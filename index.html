@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal Layanan PBB-P2 – Kabupaten Tabanan</title>
-<link rel="icon" type="image/png"
-href="https://upload.wikimedia.org/wikipedia/commons/7/7d/Lambang_Kabupaten_Tabanan.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1244,12 +1242,19 @@ href="https://upload.wikimedia.org/wikipedia/commons/7/7d/Lambang_Kabupaten_Taba
       <div id="slideshowAdminPanel" style="display:none; background:#fff8f8; border-bottom:1px solid rgba(192,57,43,0.12); padding:0.85rem 1rem;">
         <div style="font-size:0.68rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem;">⚙ Kelola Foto Informasi PBB</div>
         <div id="slideshowThumbGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:0.75rem;"></div>
-        <label style="display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-size:0.75rem;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;">
-          <svg viewBox="0 0 16 16" fill="none" style="width:13px;height:13px;stroke:#fff;stroke-width:2;stroke-linecap:round;"><path d="M8 10V4M5 7l3-3 3 3M3 13h10"/></svg>
-          Tambah Foto
-          <input type="file" id="slideshowUploadInput" multiple accept="image/*" style="display:none">
-        </label>
-        <button onclick="closeSlideshowAdmin()" style="margin-left:6px;background:var(--gray-light);color:var(--gray-text);border:none;border-radius:8px;padding:7px 14px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;">Tutup</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:0.5rem;">
+          <button onclick="reloadSlideshowFromDrive()" style="display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-size:0.75rem;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;border:none;font-family:inherit;">
+            <svg viewBox="0 0 16 16" fill="none" style="width:13px;height:13px;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
+              <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c1.8 0 3.4.87 4.4 2.2"/>
+              <path d="M13.5 2.5v2.7H10.8"/>
+            </svg>
+            Muat Ulang dari Drive
+          </button>
+          <button onclick="closeSlideshowAdmin()" style="background:var(--gray-light);color:var(--gray-text);border:none;border-radius:8px;padding:7px 14px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;">Tutup</button>
+        </div>
+        <p style="font-size:0.68rem;color:var(--gray-mid);margin-top:0.5rem;line-height:1.5;">
+          Untuk menambah/menghapus foto: buka <strong>folder Google Drive</strong> Anda, kelola foto di sana, lalu klik <em>Muat Ulang dari Drive</em>.
+        </p>
       </div>
 
       <div class="slideshow-viewport" id="viewport"></div>
@@ -1540,136 +1545,7 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
   if (e.key === 'Enter') submitAdminLogin();
 });
 
-/* ══════════════════════════════════════════════════════════
-   SLIDESHOW
-   ══════════════════════════════════════════════════════════ */
-(function () {
-  const STORE_KEY = 'pbb_slideshow_images';
-  const DEFAULT_GDRIVE = [
-    'https://drive.google.com/thumbnail?id=12jy9ORHZtZWJTu_Ilw476dSqozjWJFnn&sz=w800',
-    'https://drive.google.com/thumbnail?id=1dC4N4zjq6nX1kuNd6-BNuuo2lIzIT37r&sz=w800',
-    'https://drive.google.com/thumbnail?id=1-cwthcx9szjP7LpR_TLECxbyu_aDczh3&sz=w800',
-    'https://drive.google.com/thumbnail?id=1mhT4WbgzSnHS667CnHhvSIR84fNbJ6s0&sz=w800',
-    'https://drive.google.com/thumbnail?id=1fruYdtsEiNTuVkfOlnND4qfJDOmo9p-2&sz=w800',
-  ];
-
-  let IMAGES;
-  try { IMAGES = JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch(e) { IMAGES = null; }
-  if (!IMAGES) IMAGES = DEFAULT_GDRIVE.map((src, i) => ({ src, name: `Foto ${i+1}` }));
-
-  const viewport    = document.getElementById('viewport');
-  const dotsWrap    = document.getElementById('dots');
-  const counterEl   = document.getElementById('slideCounter');
-  const progressBar = document.getElementById('progressBar');
-  const INTERVAL    = 6000;
-  let slides = [], current = 0, timer = null;
-
-  function buildSlides() {
-    viewport.innerHTML = ''; dotsWrap.innerHTML = '';
-    slides = []; current = 0; clearTimeout(timer);
-    IMAGES.forEach((img, i) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'slide' + (i === 0 ? ' active' : '');
-      const el = document.createElement('img');
-      el.src = img.src; el.alt = img.name;
-      el.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-      el.addEventListener('click', function() { lbOpen(this.src, this.alt); });
-      wrap.appendChild(el); viewport.appendChild(wrap); slides.push(wrap);
-      const d = document.createElement('div');
-      d.className = 'slide-dot' + (i === 0 ? ' active' : '');
-      d.addEventListener('click', () => { goTo(i); restartTimer(); });
-      dotsWrap.appendChild(d);
-    });
-    updateCounter(); startProgress(); scheduleNext();
-  }
-
-  function updateCounter() { if(counterEl) counterEl.textContent = `${current+1} / ${slides.length}`; }
-
-  function goTo(idx) {
-    if (!slides.length) return;
-    slides[current].classList.remove('active');
-    dotsWrap.children[current]?.classList.remove('active');
-    current = (idx + slides.length) % slides.length;
-    slides[current].classList.add('active');
-    dotsWrap.children[current]?.classList.add('active');
-    updateCounter(); startProgress();
-  }
-
-  function startProgress() {
-    if (!progressBar) return;
-    progressBar.style.transition = 'none'; progressBar.style.width = '0%';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      progressBar.style.transition = `width ${INTERVAL}ms linear`;
-      progressBar.style.width = '100%';
-    }));
-  }
-
-  function restartTimer() { clearTimeout(timer); startProgress(); scheduleNext(); }
-
-  function scheduleNext() {
-    timer = setTimeout(() => { goTo(current + 1); scheduleNext(); }, INTERVAL + (Math.random()-0.5)*1000);
-  }
-
-  buildSlides();
-
-  /* Admin panel slideshow */
-  function buildThumbGrid() {
-    const grid = document.getElementById('slideshowThumbGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    IMAGES.forEach((img, i) => {
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'position:relative;width:70px;height:70px;border-radius:8px;overflow:hidden;border:1.5px solid rgba(192,57,43,0.2);flex-shrink:0;';
-      const thumb = document.createElement('img');
-      thumb.src = img.src;
-      thumb.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-      const del = document.createElement('button');
-      del.innerHTML = '✕';
-      del.style.cssText = 'position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(192,57,43,0.85);color:#fff;border:none;border-radius:50%;font-size:0.65rem;cursor:pointer;font-weight:700;line-height:1;padding:0;';
-      del.onclick = () => {
-        if (!confirm(`Hapus foto "${img.name}"?`)) return;
-        IMAGES.splice(i, 1);
-        try { localStorage.setItem(STORE_KEY, JSON.stringify(IMAGES)); } catch(e) {}
-        buildThumbGrid(); buildSlides();
-      };
-      wrap.appendChild(thumb); wrap.appendChild(del); grid.appendChild(wrap);
-    });
-  }
-
-  window.openSlideshowAdmin = function () {
-    buildThumbGrid();
-    document.getElementById('slideshowAdminPanel').style.display = 'block';
-  };
-
-  window.closeSlideshowAdmin = function () {
-    document.getElementById('slideshowAdminPanel').style.display = 'none';
-    _adminUnlocked = false;
-  };
-
-  const uploadInput = document.getElementById('slideshowUploadInput');
-  if (uploadInput) {
-    uploadInput.addEventListener('change', function () {
-      const files = Array.from(this.files);
-      if (!files.length) return;
-      let done = 0;
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          IMAGES.push({ src: e.target.result, name: file.name });
-          done++;
-          if (done === files.length) {
-            try { localStorage.setItem(STORE_KEY, JSON.stringify(IMAGES)); } catch(e) {
-              alert('Penyimpanan penuh. Hapus beberapa foto terlebih dahulu.');
-            }
-            buildThumbGrid(); buildSlides();
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-      this.value = '';
-    });
-  }
-})();
+/* Slideshow dikelola oleh IIFE di bagian bawah (Google Drive) */
 
 /* ══════════════════════════════════════════════════════════
    PANEL PENGUMUMAN & COUNTDOWN
@@ -2242,57 +2118,162 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
   renderAnnouncements();
 })();
 
-/* ── JAM OPERASIONAL ── */
+/* ── JAM OPERASIONAL + LIBUR NASIONAL ── */
 (function () {
-  // Jam operasional (WITA = UTC+8)
+
+  // ═══════════════════════════════════════════════════════════
+  //  DAFTAR LIBUR NASIONAL & CUTI BERSAMA
+  //  Format: 'YYYY-MM-DD': 'Keterangan libur'
+  //  ➜ Untuk menambah/menghapus, edit bagian HOLIDAYS di bawah
+  // ═══════════════════════════════════════════════════════════
+  const HOLIDAYS = {
+    // ── 2025 ──
+    '2025-01-01': 'Tahun Baru Masehi',
+    '2025-01-27': 'Isra Miraj',
+    '2025-01-28': 'Cuti Bersama Isra Miraj',
+    '2025-01-29': 'Tahun Baru Imlek',
+    '2025-03-28': 'Hari Raya Nyepi',
+    '2025-03-29': 'Cuti Bersama Nyepi',
+    '2025-03-31': 'Idul Fitri',
+    '2025-04-01': 'Idul Fitri',
+    '2025-04-02': 'Cuti Bersama Idul Fitri',
+    '2025-04-03': 'Cuti Bersama Idul Fitri',
+    '2025-04-04': 'Cuti Bersama Idul Fitri',
+    '2025-04-07': 'Cuti Bersama Idul Fitri',
+    '2025-04-18': 'Wafat Isa Al-Masih',
+    '2025-04-20': 'Paskah',
+    '2025-05-01': 'Hari Buruh Internasional',
+    '2025-05-12': 'Hari Raya Waisak',
+    '2025-05-13': 'Cuti Bersama Waisak',
+    '2025-05-29': 'Kenaikan Isa Al-Masih',
+    '2025-05-30': 'Cuti Bersama Kenaikan Isa Al-Masih',
+    '2025-06-01': 'Hari Lahir Pancasila',
+    '2025-06-06': 'Idul Adha',
+    '2025-06-27': 'Tahun Baru Islam 1447 H',
+    '2025-08-17': 'HUT Kemerdekaan RI',
+    '2025-09-05': 'Maulid Nabi Muhammad SAW',
+    '2025-12-25': 'Hari Raya Natal',
+    '2025-12-26': 'Cuti Bersama Natal',
+
+    // ── 2026 ──
+    '2026-01-01': 'Tahun Baru Masehi',
+    '2026-01-16': 'Isra Miraj',
+    '2026-01-17': 'Tahun Baru Imlek',
+    '2026-03-17': 'Hari Raya Nyepi',
+    '2026-03-20': 'Idul Fitri',
+    '2026-03-21': 'Idul Fitri',
+    '2026-03-23': 'Cuti Bersama Idul Fitri',
+    '2026-03-24': 'Cuti Bersama Idul Fitri',
+    '2026-03-25': 'Cuti Bersama Idul Fitri',
+    '2026-03-26': 'Cuti Bersama Idul Fitri',
+    '2026-03-27': 'Cuti Bersama Idul Fitri',
+    '2026-04-03': 'Wafat Isa Al-Masih',
+    '2026-05-01': 'Hari Buruh Internasional',
+    '2026-05-14': 'Kenaikan Isa Al-Masih',
+    '2026-05-15': 'Cuti Bersama',
+    '2026-05-27': 'Idul Adha',
+    '2026-05-28': 'Cuti Bersama',
+    '2026-06-01': 'Hari Lahir Pancasila',
+    '2026-06-10': 'Hari Raya Waisak',
+    '2026-06-16': 'Hari Penampahan Galungan',
+    '2026-06-17': 'Hari Raya Galungan',
+    '2026-06-18': 'Hari Manis Galungan',
+    '2026-08-17': 'HUT Kemerdekaan RI',
+    '2026-08-25': 'Maulid Nabi Muhammad SAW',
+    '2026-12-25': 'Hari Raya Natal',
+  };
+  // ═══════════════════════════════════════════════════════════
+
+  // Jam operasional reguler (WITA = UTC+8)
   const schedule = {
-    1: { open: 7.5,  close: 15.5 },  // Senin
-    2: { open: 7.5,  close: 15.5 },  // Selasa
-    3: { open: 7.5,  close: 15.5 },  // Rabu
-    4: { open: 7.5,  close: 15.5 },  // Kamis
-    5: { open: 7.5,  close: 14.0 },  // Jumat
-    0: null,                           // Minggu (libur)
-    6: null,                           // Sabtu (libur)
+    1: { open: 7.5, close: 15.5 },  // Senin
+    2: { open: 7.5, close: 15.5 },  // Selasa
+    3: { open: 7.5, close: 15.5 },  // Rabu
+    4: { open: 7.5, close: 15.5 },  // Kamis
+    5: { open: 7.5, close: 14.0 },  // Jumat
+    0: null,                          // Minggu
+    6: null,                          // Sabtu
   };
 
-  const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  // Format angka jam → string "08.00"
+  function fmtHour(h) {
+    const hh = Math.floor(h);
+    const mm = (h % 1) * 60;
+    return `${String(hh).padStart(2,'0')}.${String(mm).padStart(2,'0')}`;
+  }
+
+  // Cek apakah tanggal adalah libur nasional/cuti bersama
+  function getHoliday(witaDate) {
+    const yyyy = witaDate.getUTCFullYear();
+    const mm   = String(witaDate.getUTCMonth() + 1).padStart(2, '0');
+    const dd   = String(witaDate.getUTCDate()).padStart(2, '0');
+    return HOLIDAYS[`${yyyy}-${mm}-${dd}`] || null;
+  }
 
   function update() {
-    // WITA = UTC+8
-    const now   = new Date();
-    const wita  = new Date(now.getTime() + (8 * 3600000));
-    const day   = wita.getUTCDay();
-    const hour  = wita.getUTCHours() + wita.getUTCMinutes() / 60;
-    const hh    = String(wita.getUTCHours()).padStart(2,'0');
-    const mm    = String(wita.getUTCMinutes()).padStart(2,'0');
+    const now  = new Date();
+    const wita = new Date(now.getTime() + 8 * 3600000); // UTC+8
+    const day  = wita.getUTCDay();
+    const hour = wita.getUTCHours() + wita.getUTCMinutes() / 60;
+    const hh   = String(wita.getUTCHours()).padStart(2,'0');
+    const min  = String(wita.getUTCMinutes()).padStart(2,'0');
 
-    document.getElementById('currentTimeDisplay').textContent = `${hh}:${mm} WITA`;
+    document.getElementById('currentTimeDisplay').textContent = `${hh}:${min} WITA`;
 
-    const badge = document.getElementById('statusBadge');
+    const badge      = document.getElementById('statusBadge');
     const statusText = document.getElementById('statusText');
-    const sched = schedule[day];
-    const isOpen = sched && hour >= sched.open && hour < sched.close;
+    const holidayName = getHoliday(wita);
+    const sched       = schedule[day];
+
+    let isOpen = false;
+    let statusMsg = '';
+
+    if (holidayName) {
+      // Hari ini libur nasional / cuti bersama
+      isOpen     = false;
+      statusMsg  = `🎌 Libur — ${holidayName}`;
+    } else if (!sched) {
+      // Sabtu / Minggu
+      isOpen    = false;
+      statusMsg = 'Libur (Sabtu/Minggu)';
+    } else {
+      isOpen = hour >= sched.open && hour < sched.close;
+      statusMsg = isOpen
+        ? `Buka sekarang — tutup pukul ${fmtHour(sched.close)} WITA`
+        : `Sedang tutup — buka pukul ${fmtHour(sched.open)} WITA`;
+    }
 
     badge.className = 'status-badge ' + (isOpen ? 'open' : 'closed');
-    statusText.textContent = isOpen
-      ? `Buka sekarang — tutup pukul ${sched.close === 14 ? '14.00' : '15.00'} WITA`
-      : (sched
-          ? `Sedang tutup — buka pukul ${sched.open === 7.5 ? '08.00' : '08.00'} WITA`
-          : 'Libur hari ini (Sabtu/Minggu)');
+    statusText.textContent = statusMsg;
 
-    // Highlight today's row
-    const rows = document.querySelectorAll('#hoursTable tr');
-    rows.forEach(row => {
+    // Tampilkan banner libur di bawah tabel jika hari ini libur nasional
+    let bannerEl = document.getElementById('holidayBanner');
+    if (holidayName) {
+      if (!bannerEl) {
+        bannerEl = document.createElement('div');
+        bannerEl.id = 'holidayBanner';
+        bannerEl.style.cssText = `
+          margin-top:0.6rem;padding:0.55rem 0.85rem;
+          background:#fff3cd;border:1px solid #f5c842;border-radius:8px;
+          font-size:0.75rem;color:#7a5c00;font-weight:500;line-height:1.5;
+        `;
+        const note = document.querySelector('.hours-note');
+        if (note) note.parentNode.insertBefore(bannerEl, note);
+      }
+      bannerEl.textContent = `🎌 Hari ini ${holidayName} — kantor tutup.`;
+    } else if (bannerEl) {
+      bannerEl.remove();
+    }
+
+    // Highlight baris hari ini di tabel
+    document.querySelectorAll('#hoursTable tr').forEach(row => {
       row.classList.remove('today');
       const d = row.getAttribute('data-day');
-      if (d) {
-        const days = d.split(',').map(Number);
-        if (days.includes(day)) {
-          row.classList.add('today');
-          const firstCell = row.querySelector('td');
-          if (firstCell && !firstCell.querySelector('.today-marker')) {
-            firstCell.innerHTML += ' <span class="today-marker">Hari ini</span>';
-          }
+      if (d && d.split(',').map(Number).includes(day)) {
+        row.classList.add('today');
+        const cell = row.querySelector('td');
+        if (cell && !cell.querySelector('.today-marker')) {
+          cell.innerHTML += ' <span class="today-marker">Hari ini</span>';
         }
       }
     });
@@ -2311,32 +2292,15 @@ function toggleFaq(btn) {
   if (!isOpen) { answer.classList.add('open'); btn.classList.add('active'); }
 }
 
-/* ── ADMIN SLIDESHOW ── */
+/* ── SLIDESHOW – sumber dari Google Drive via Apps Script ── */
 (function () {
-  // Simpan foto sebagai base64 di localStorage
-  const STORE_KEY = 'pbb_slideshow_images';
 
-  function loadImages() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch(e) { return null; }
-  }
-  function saveImages(arr) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); } catch(e) {
-      alert('Penyimpanan penuh. Coba hapus beberapa foto terlebih dahulu.');
-    }
-  }
-
-  // Gambar default dari Google Drive jika belum ada lokal
-  const DEFAULT_GDRIVE = [
-    'https://drive.google.com/thumbnail?id=12jy9ORHZtZWJTu_Ilw476dSqozjWJFnn&sz=w800',
-    'https://drive.google.com/thumbnail?id=1dC4N4zjq6nX1kuNd6-BNuuo2lIzIT37r&sz=w800',
-    'https://drive.google.com/thumbnail?id=1-cwthcx9szjP7LpR_TLECxbyu_aDczh3&sz=w800',
-    'https://drive.google.com/thumbnail?id=1mhT4WbgzSnHS667CnHhvSIR84fNbJ6s0&sz=w800',
-    'https://drive.google.com/thumbnail?id=1fruYdtsEiNTuVkfOlnND4qfJDOmo9p-2&sz=w800',
-  ];
-
-  let IMAGES = loadImages(); // array of {src, name} | null
-  const useDefault = !IMAGES;
-  if (useDefault) IMAGES = DEFAULT_GDRIVE.map((src, i) => ({ src, name: `Foto ${i+1}` }));
+  // ┌─────────────────────────────────────────────────────────────┐
+  // │  GANTI URL INI dengan URL deployment Apps Script Anda       │
+  // │  Contoh:                                                    │
+  // │  https://script.google.com/macros/s/AKfy.../exec            │
+  // └─────────────────────────────────────────────────────────────┘
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwB18Ui8QpiylwgCDYj0B0y-FZ6d0bVuEMAC3gmSeU_JaspGq6Ze2Q6Ta5tZWZvqLfuAQ/exec';
 
   const viewport    = document.getElementById('viewport');
   const dotsWrap    = document.getElementById('dots');
@@ -2344,13 +2308,49 @@ function toggleFaq(btn) {
   const progressBar = document.getElementById('progressBar');
   const INTERVAL    = 6000;
 
-  let slides  = [], current = 0, timer = null, progTimer = null;
+  let IMAGES  = [];
+  let slides  = [], current = 0, timer = null;
 
+  /* ── Tampilkan placeholder loading saat fetch ── */
+  function showLoading() {
+    viewport.innerHTML = `
+      <div style="width:100%;height:100%;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:12px;background:var(--red-light);">
+        <div style="width:36px;height:36px;border:3px solid rgba(192,57,43,0.2);
+          border-top-color:var(--red);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <p style="font-size:0.72rem;color:var(--gray-mid);">Memuat foto…</p>
+      </div>`;
+    if (!document.getElementById('spinKf')) {
+      const s = document.createElement('style');
+      s.id = 'spinKf';
+      s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(s);
+    }
+  }
+
+  /* ── Tampilkan error jika fetch gagal ── */
+  function showError(msg) {
+    viewport.innerHTML = `
+      <div style="width:100%;height:100%;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:8px;background:var(--red-light);padding:1.5rem;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--red)"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p style="font-size:0.72rem;color:var(--gray-mid);text-align:center;line-height:1.5;">${msg}</p>
+      </div>`;
+  }
+
+  /* ── Bangun slide dari array IMAGES ── */
   function buildSlides() {
     viewport.innerHTML = '';
     dotsWrap.innerHTML = '';
-    slides = [];
+    slides  = [];
     current = 0;
+    clearTimeout(timer);
+
+    if (!IMAGES.length) { showError('Belum ada foto di folder Drive.'); return; }
 
     IMAGES.forEach((img, i) => {
       const wrap = document.createElement('div');
@@ -2359,7 +2359,7 @@ function toggleFaq(btn) {
       el.src = img.src;
       el.alt = img.name;
       el.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-      el.addEventListener('click', function() { lbOpen(this.src, this.alt); });
+      el.addEventListener('click', function () { lbOpen(this.src, this.alt); });
       wrap.appendChild(el);
       viewport.appendChild(wrap);
       slides.push(wrap);
@@ -2375,7 +2375,9 @@ function toggleFaq(btn) {
     scheduleNext();
   }
 
-  function updateCounter() { counterEl.textContent = `${current + 1} / ${slides.length}`; }
+  function updateCounter() {
+    counterEl.textContent = slides.length ? `${current + 1} / ${slides.length}` : '0 / 0';
+  }
 
   function goTo(idx) {
     if (!slides.length) return;
@@ -2388,7 +2390,6 @@ function toggleFaq(btn) {
   }
 
   function startProgress() {
-    clearInterval(progTimer);
     progressBar.style.transition = 'none';
     progressBar.style.width = '0%';
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -2404,33 +2405,59 @@ function toggleFaq(btn) {
     timer = setTimeout(() => { goTo(current + 1); scheduleNext(); }, INTERVAL + jitter);
   }
 
-  buildSlides();
+  /* ── Fetch foto dari Apps Script ── */
+  function fetchFromDrive() {
+    showLoading();
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('GANTI')) {
+      showError('URL Apps Script belum diisi.<br>Buka file HTML dan isi APPS_SCRIPT_URL.');
+      return;
+    }
+    fetch(APPS_SCRIPT_URL)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(data => {
+        if (!data.ok) throw new Error(data.error || 'Respons tidak valid');
+        IMAGES = data.images;
+        buildSlides();
+        buildThumbGrid();
+      })
+      .catch(err => {
+        showError(`Gagal memuat foto dari Drive.<br><small>${err.message}</small>`);
+      });
+  }
 
-  // ── ADMIN PANEL SLIDESHOW ──
+  /* ── Admin panel: tampilkan thumbnail ── */
   function buildThumbGrid() {
     const grid = document.getElementById('slideshowThumbGrid');
+    if (!grid) return;
     grid.innerHTML = '';
-    IMAGES.forEach((img, i) => {
+
+    if (!IMAGES.length) {
+      grid.innerHTML = '<p style="font-size:0.75rem;color:var(--gray-mid);text-align:center;width:100%;">Belum ada foto di folder Drive.</p>';
+      return;
+    }
+
+    IMAGES.forEach(img => {
       const wrap = document.createElement('div');
       wrap.style.cssText = 'position:relative;width:70px;height:70px;border-radius:8px;overflow:hidden;border:1.5px solid rgba(192,57,43,0.2);';
       const thumb = document.createElement('img');
       thumb.src = img.src;
       thumb.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-      const del = document.createElement('button');
-      del.innerHTML = '✕';
-      del.title = 'Hapus foto ini';
-      del.style.cssText = 'position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(192,57,43,0.85);color:#fff;border:none;border-radius:50%;font-size:0.65rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;';
-      del.onclick = () => {
-        if (!confirm(`Hapus foto "${img.name}"?`)) return;
-        IMAGES.splice(i, 1);
-        saveImages(IMAGES);
-        buildThumbGrid();
-        buildSlides();
-      };
       wrap.appendChild(thumb);
-      wrap.appendChild(del);
       grid.appendChild(wrap);
     });
+
+    /* Tampilkan info bahwa pengelolaan foto lewat Drive */
+    const info = document.createElement('div');
+    info.style.cssText = 'width:100%;margin-top:0.5rem;padding:0.6rem 0.8rem;background:rgba(192,57,43,0.06);border-radius:8px;border:1px solid rgba(192,57,43,0.15);';
+    info.innerHTML = `<p style="font-size:0.72rem;color:var(--gray-mid);line-height:1.6;">
+      💡 <strong>Untuk menambah / menghapus foto:</strong><br>
+      Buka folder Google Drive Anda, lalu tambahkan atau hapus foto di sana.<br>
+      Klik tombol <strong>Muat Ulang</strong> di bawah agar slideshow diperbarui.
+    </p>`;
+    grid.parentElement.insertBefore(info, grid.nextSibling);
   }
 
   window.openSlideshowAdmin = function () {
@@ -2443,25 +2470,16 @@ function toggleFaq(btn) {
     _adminUnlocked = false;
   };
 
-  document.getElementById('slideshowUploadInput').addEventListener('change', function () {
-    const files = Array.from(this.files);
-    if (!files.length) return;
-    let loaded = 0;
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        IMAGES.push({ src: e.target.result, name: file.name });
-        loaded++;
-        if (loaded === files.length) {
-          saveImages(IMAGES);
-          buildThumbGrid();
-          buildSlides();
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-    this.value = '';
-  });
+  /* Tombol "Muat Ulang" di admin panel – refresh dari Drive */
+  window.reloadSlideshowFromDrive = function () {
+    fetchFromDrive();
+    document.getElementById('slideshowAdminPanel').style.display = 'none';
+    _adminUnlocked = false;
+  };
+
+  /* Jalankan saat halaman pertama kali dibuka */
+  fetchFromDrive();
+
 })();
 
 /* ── ADMIN FAQ ── */
