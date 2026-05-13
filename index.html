@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal Layanan PBB-P2 – Kabupaten Tabanan</title>
+<link rel="icon" type="image/png"
+href="https://upload.wikimedia.org/wikipedia/commons/7/7d/Lambang_Kabupaten_Tabanan.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1721,12 +1723,12 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
 (function () {
   const STORE_KEY = 'pbb_faq_items';
   const DEFAULT_FAQ = [
-    { q:'Bagaimana cara membayar PBB-P2?',                              a:'Pembayaran dapat dilakukan melalui <strong>Bank BPD Bali</strong>, kantor pos, minimarket (Indomaret/Alfamart), atau mobile banking. Siapkan <strong>NOP</strong> yang tertera di SPPT Anda.' },
-    { q:'Apa itu NOP dan di mana saya menemukannya?',                   a:'<strong>NOP (Nomor Objek Pajak)</strong> adalah nomor unik 18 digit. Ditemukan di <strong>SPPT</strong> yang diterbitkan setiap tahun, atau hubungi kantor Bapenda Kabupaten Tabanan.' },
-    { q:'Berapa sanksi keterlambatan pembayaran PBB?',                  a:'Keterlambatan dikenakan <strong>denda 2% per bulan</strong> dari pokok pajak, dihitung sejak jatuh tempo (31 Agustus).' },
+    { q:'Bagaimana cara membayar PBB-P2?',                              a:'Pembayaran dapat dilakukan melalui <strong>Bank BPD Bali</strong>, Kantor Pos, Gopay, Tokopedia, BUMDes, LPD, atau mobile banking. Siapkan <strong>NOP</strong> yang tertera di SPPT Anda.' },
+    { q:'Apa itu NOP dan di mana saya menemukannya?',                   a:'<strong>NOP (Nomor Objek Pajak)</strong> adalah nomor unik 18 digit (biasanya diawali dengan 51.02.xxx). Ditemukan di <strong>SPPT</strong> yang diterbitkan setiap tahun.' },
+    { q:'Berapa sanksi keterlambatan pembayaran PBB?',                  a:'Keterlambatan dikenakan <strong>denda 2% per bulan</strong> dari pokok pajak, dihitung sejak jatuh tempo (30 Oktober).' },
     { q:'Apa saja syarat mengajukan permohonan SK NJOP?',               a:'<strong>(1)</strong> KTP, <strong>(2)</strong> Sertifikat tanah, <strong>(3)</strong> SPPT tahun terakhir, <strong>(4)</strong> Surat kuasa (jika dikuasakan), <strong>(5)</strong> Formulir permohonan.' },
-    { q:'Bagaimana cara mengajukan keberatan atas nilai NJOP?',         a:'Diajukan tertulis ke Bapenda paling lambat <strong>3 bulan</strong> sejak SPPT diterima, disertai dokumen pendukung.' },
-    { q:'Apa penyebab objek PBB diblokir dan cara membuka blokirnya?', a:'Disebabkan sengketa kepemilikan atau proses jual-beli yang belum selesai. Ajukan permohonan via menu <em>Buka Blokir PBB</em>. Proses <strong>5–14 hari kerja</strong>.' },
+    { q:'Bagaimana cara mengajukan keberatan atas nilai NJOP?',         a:'Diajukan tertulis ke Bakeuda paling lambat <strong>3 bulan</strong> sejak SPPT diterima, disertai dokumen pendukung.' },
+    { q:'Apa penyebab objek PBB diblokir dan cara membuka blokirnya?', a:'Disebabkan keterlambatan pembayaran PBB selama 5 tahun berturut turut. Ajukan permohonan via menu <em>Buka Blokir PBB</em>. Proses <strong>5–14 hari kerja</strong>.' },
   ];
 
   let FAQ_DATA;
@@ -1827,7 +1829,7 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
       badge: 'active',
       badgeText: '✅ Aktif',
       title: 'SPPT PBB Sudah Bisa Diambil',
-      detail: 'Surat Pemberitahuan Pajak Terutang tahun 2026 sudah tersedia di kantor BKD',
+      detail: 'Surat Pemberitahuan Pajak Terutang tahun 2026 sudah tersedia di kantor desa',
       mode: 'text',
       deadline: '',
       extraText: 'Bawa KTP & bukti kepemilikan',
