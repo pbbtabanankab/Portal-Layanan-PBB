@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Layanan PBB-P2 – Kabupaten Tabanan</title>
+<title>Portal Layanan PBB-P2 Kabupaten Tabanan</title>
 <link rel="icon" type="image/png"
 href="https://upload.wikimedia.org/wikipedia/commons/7/7d/Lambang_Kabupaten_Tabanan.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
@@ -1467,6 +1467,9 @@ href="https://upload.wikimedia.org/wikipedia/commons/7/7d/Lambang_Kabupaten_Taba
 </footer>
 
 <script>
+/* ── URL GOOGLE APPS SCRIPT (satu tempat untuk semua fitur) ── */
+var _GAS_URL = 'https://script.google.com/macros/s/AKfycbyY9ANjjNdgKvKtJ-0SpQsR5WxrJF21sEXdO8_vdmXzxyMl9bbMmJrLpySggsX4oJMnNw/exec';
+
 /* ══════════════════════════════════════════════════════════
    ADMIN AUTH — password hash SHA-256 dari "258369"
    ══════════════════════════════════════════════════════════ */
@@ -1550,16 +1553,14 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
 /* Slideshow dikelola oleh IIFE di bagian bawah (Google Drive) */
 
 /* ══════════════════════════════════════════════════════════
-   PANEL PENGUMUMAN & COUNTDOWN
+   PANEL PENGUMUMAN & COUNTDOWN  (data dari Google Sheets)
    ══════════════════════════════════════════════════════════ */
 (function () {
-  let ANNOUNCEMENTS = null;
-  try { ANNOUNCEMENTS = JSON.parse(localStorage.getItem('pbb_announcements')); } catch(e) {}
-  ANNOUNCEMENTS = ANNOUNCEMENTS || [
-    { id:1, icon:'calendar', color:'#C0392B', bg:'#FDEEEC', type:'Jatuh Tempo', badge:'urgent',  badgeText:'⚠️ Segera',   title:'Jatuh Tempo PBB 2026',              detail:'Batas akhir pembayaran PBB-P2 Tahun 2026',                                            mode:'countdown', deadline:'2026-10-30', extraText:'' },
-    { id:2, icon:'document', color:'#1A6DB5', bg:'#EBF4FF', type:'Informasi',   badge:'active',  badgeText:'✅ Aktif',    title:'SPPT PBB Sudah Bisa Diambil',       detail:'Surat Pemberitahuan Pajak Terutang tahun 2026 sudah tersedia di kantor BKD',     mode:'text',      deadline:'',          extraText:'Bawa KTP & bukti kepemilikan' },
-    { id:3, icon:'gift',     color:'#B7791F', bg:'#FEF9EC', type:'Program',     badge:'warning', badgeText:'🎁 Program', title:'Penghapusan Sanksi Administratif',  detail:'Program penghapusan denda & sanksi PBB bagi wajib pajak yang melunasi tunggakan', mode:'text',      deadline:'',          extraText:'Berlaku sesuai ketentuan yang berlaku' },
-    { id:4, icon:'star',     color:'#0B7A45', bg:'#E6F9F0', type:'Event',       badge:'info',    badgeText:'🏆 Event',   title:'Gebyar PBB 2026',                   detail:'Perayaan dan penghargaan bagi wajib pajak taat & lunas sebelum jatuh tempo',     mode:'text',      deadline:'',          extraText:'Info lebih lanjut segera diumumkan' },
+  let ANNOUNCEMENTS = [
+    { id:'1', icon:'calendar', color:'#C0392B', bg:'#FDEEEC', type:'Jatuh Tempo', badge:'urgent',  badgeText:'⚠️ Segera',   title:'Jatuh Tempo PBB 2026',             detail:'Batas akhir pembayaran PBB-P2 Tahun 2026',                                            mode:'countdown', deadline:'2026-10-30', extraText:'' },
+    { id:'2', icon:'document', color:'#1A6DB5', bg:'#EBF4FF', type:'Informasi',   badge:'active',  badgeText:'✅ Aktif',    title:'SPPT PBB Sudah Bisa Diambil',      detail:'SPPT tahun 2026 sudah tersedia di kantor BKD',                                       mode:'text',      deadline:'',          extraText:'Bawa KTP & bukti kepemilikan' },
+    { id:'3', icon:'gift',     color:'#B7791F', bg:'#FEF9EC', type:'Program',     badge:'warning', badgeText:'🎁 Program', title:'Penghapusan Sanksi Administratif', detail:'Program penghapusan denda & sanksi PBB bagi wajib pajak yang melunasi tunggakan', mode:'text',      deadline:'',          extraText:'Berlaku sesuai ketentuan' },
+    { id:'4', icon:'star',     color:'#0B7A45', bg:'#E6F9F0', type:'Event',       badge:'info',    badgeText:'🏆 Event',   title:'Gebyar PBB 2026',                  detail:'Penghargaan bagi wajib pajak taat & lunas sebelum jatuh tempo',                     mode:'text',      deadline:'',          extraText:'Info segera diumumkan' },
   ];
 
   const ICONS = {
@@ -1673,7 +1674,6 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
     document.querySelectorAll('#adminFields [data-idx]').forEach(el => {
       ANNOUNCEMENTS[+el.dataset.idx][el.dataset.key] = el.value;
     });
-    try { localStorage.setItem('pbb_announcements', JSON.stringify(ANNOUNCEMENTS)); } catch(e) {}
     document.getElementById('adminPanel').style.display = 'none';
     _adminUnlocked = false;
     renderAnnouncements();
@@ -1686,7 +1686,7 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
    JAM OPERASIONAL
    ══════════════════════════════════════════════════════════ */
 (function () {
-  const schedule = { 1:{open:7.5,close:15.5}, 2:{open:7.5,close:15.5}, 3:{open:7.5,close:15.5}, 4:{open:7.5,close:15.5}, 5:{open:7.5,close:14.0}, 0:null, 6:null };
+  const schedule = { 1:{open:8,close:15}, 2:{open:8,close:15}, 3:{open:8,close:15}, 4:{open:8,close:15}, 5:{open:8,close:12}, 0:null, 6:null };
   function update() {
     const now  = new Date();
     const wita = new Date(now.getTime() + 8*3600000);
@@ -1702,7 +1702,7 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
     const isOpen = sched && hour >= sched.open && hour < sched.close;
     if (badge)  badge.className = 'status-badge ' + (isOpen ? 'open' : 'closed');
     if (stText) stText.textContent = isOpen
-      ? `Buka sekarang — tutup pukul ${sched.close===14?'12.00':'15.00'} WITA`
+      ? `Buka sekarang — tutup pukul ${sched.close===12?'12.00':'15.00'} WITA`
       : (sched ? `Sedang tutup — buka pukul 08.00 WITA` : 'Libur hari ini (Sabtu/Minggu)');
     document.querySelectorAll('#hoursTable tr').forEach(row => {
       row.classList.remove('today');
@@ -1718,21 +1718,19 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
 })();
 
 /* ══════════════════════════════════════════════════════════
-   FAQ
+   FAQ  (data dari Google Sheets via Apps Script)
    ══════════════════════════════════════════════════════════ */
 (function () {
-  const STORE_KEY = 'pbb_faq_items';
   const DEFAULT_FAQ = [
-    { q:'Bagaimana cara membayar PBB-P2?',                              a:'Pembayaran dapat dilakukan melalui <strong>Bank BPD Bali</strong>, Kantor Pos, Gopay, Tokopedia, BUMDes, LPD, atau mobile banking. Siapkan <strong>NOP</strong> yang tertera di SPPT Anda.' },
-    { q:'Apa itu NOP dan di mana saya menemukannya?',                   a:'<strong>NOP (Nomor Objek Pajak)</strong> adalah nomor unik 18 digit (biasanya diawali dengan 51.02.xxx). Ditemukan di <strong>SPPT</strong> yang diterbitkan setiap tahun.' },
-    { q:'Berapa sanksi keterlambatan pembayaran PBB?',                  a:'Keterlambatan dikenakan <strong>denda 2% per bulan</strong> dari pokok pajak, dihitung sejak jatuh tempo (30 Oktober).' },
-    { q:'Apa saja syarat mengajukan permohonan SK NJOP?',               a:'<strong>(1)</strong> KTP, <strong>(2)</strong> Sertifikat tanah, <strong>(3)</strong> SPPT tahun terakhir, <strong>(4)</strong> Surat kuasa (jika dikuasakan), <strong>(5)</strong> Formulir permohonan.' },
-    { q:'Bagaimana cara mengajukan keberatan atas nilai NJOP?',         a:'Diajukan tertulis ke Bakeuda paling lambat <strong>3 bulan</strong> sejak SPPT diterima, disertai dokumen pendukung.' },
-    { q:'Apa penyebab objek PBB diblokir dan cara membuka blokirnya?', a:'Disebabkan keterlambatan pembayaran PBB selama 5 tahun berturut turut. Ajukan permohonan via menu <em>Buka Blokir PBB</em>. Proses <strong>5–14 hari kerja</strong>.' },
+    { q:'Bagaimana cara membayar PBB-P2?',                              a:'Pembayaran dapat dilakukan melalui <strong>Bank BPD Bali</strong>, kantor pos, minimarket (Indomaret/Alfamart), atau mobile banking. Siapkan <strong>NOP</strong> yang tertera di SPPT Anda.' },
+    { q:'Apa itu NOP dan di mana saya menemukannya?',                   a:'<strong>NOP (Nomor Objek Pajak)</strong> adalah nomor unik 18 digit. Ditemukan di <strong>SPPT</strong> yang diterbitkan setiap tahun, atau hubungi kantor Bapenda Kabupaten Tabanan.' },
+    { q:'Berapa sanksi keterlambatan pembayaran PBB?',                  a:'Keterlambatan dikenakan <strong>denda 2% per bulan</strong> dari pokok pajak, dihitung sejak jatuh tempo (31 Agustus).' },
+    { q:'Apa saja syarat mengajukan permohonan SK NJOP?',               a:'<strong>(1)</strong> KTP, <strong>(2)</strong> Sertifikat tanah, <strong>(3)</strong> SPPT tahun terakhir, <strong>(4)</strong> Surat kuasa jika dikuasakan, <strong>(5)</strong> Formulir permohonan.' },
+    { q:'Bagaimana cara mengajukan keberatan atas nilai NJOP?',         a:'Diajukan tertulis ke Bapenda paling lambat <strong>3 bulan</strong> sejak SPPT diterima, disertai dokumen pendukung.' },
+    { q:'Apa penyebab objek PBB diblokir dan cara membuka blokirnya?', a:'Disebabkan sengketa kepemilikan atau proses jual-beli yang belum selesai. Ajukan via menu <em>Buka Blokir PBB</em>. Proses <strong>5–14 hari kerja</strong>.' },
   ];
 
-  let FAQ_DATA;
-  try { FAQ_DATA = JSON.parse(localStorage.getItem(STORE_KEY)) || DEFAULT_FAQ; } catch(e) { FAQ_DATA = DEFAULT_FAQ; }
+  let FAQ_DATA = DEFAULT_FAQ;
 
   function renderFaqPublic() {
     const list = document.getElementById('faqList');
@@ -1751,27 +1749,8 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
     });
   }
 
-  function buildFaqAdminList() {
-    const container = document.getElementById('faqAdminList');
-    if (!container) return;
-    container.innerHTML = '';
-    FAQ_DATA.forEach((item, i) => {
-      const row = document.createElement('div');
-      row.style.cssText = 'background:#fff;border:1.5px solid rgba(192,57,43,0.15);border-radius:10px;padding:0.75rem;';
-      row.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
-          <span style="font-size:0.68rem;font-weight:700;color:var(--red);text-transform:uppercase;">FAQ ${i+1}</span>
-          <button onclick="deleteFaqItem(${i})" style="background:rgba(192,57,43,0.1);color:var(--red);border:none;border-radius:6px;padding:3px 9px;font-size:0.7rem;font-weight:700;cursor:pointer;font-family:inherit;">✕ Hapus</button>
-        </div>
-        <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:3px;">Pertanyaan</div>
-        <input type="text" data-faq-idx="${i}" data-faq-key="q" value="${item.q.replace(/"/g,'&quot;')}"
-          style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.12);border-radius:7px;font-size:0.8rem;font-family:inherit;margin-bottom:0.4rem;outline:none;box-sizing:border-box;">
-        <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:3px;">Jawaban</div>
-        <textarea data-faq-idx="${i}" data-faq-key="a"
-          style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.12);border-radius:7px;font-size:0.8rem;font-family:inherit;resize:vertical;min-height:60px;outline:none;box-sizing:border-box;">${item.a}</textarea>`;
-      container.appendChild(row);
-    });
-  }
+  window._faqSetData = function(data) { FAQ_DATA = data; renderFaqPublic(); };
+  window._faqGetData = function() { return FAQ_DATA; };
 
   window.toggleFaq = function (btn) {
     const answer = btn.nextElementSibling;
@@ -1781,87 +1760,20 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
     if (!isOpen) { answer.classList.add('open'); btn.classList.add('active'); }
   };
 
-  window.openFaqAdmin = function () { buildFaqAdminList(); document.getElementById('faqAdminPanel').style.display = 'block'; };
-  window.closeFaqAdmin = function () { document.getElementById('faqAdminPanel').style.display = 'none'; _adminUnlocked = false; };
-  window.addFaqItem = function () { FAQ_DATA.push({ q:'Pertanyaan baru', a:'Jawaban di sini.' }); buildFaqAdminList(); };
-  window.deleteFaqItem = function (idx) { if (!confirm('Hapus FAQ ini?')) return; FAQ_DATA.splice(idx, 1); buildFaqAdminList(); };
-  window.saveFaq = function () {
-    document.querySelectorAll('#faqAdminList [data-faq-idx]').forEach(el => {
-      FAQ_DATA[+el.dataset.faqIdx][el.dataset.faqKey] = el.value;
-    });
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(FAQ_DATA)); } catch(e) {}
-    renderFaqPublic(); closeFaqAdmin();
-  };
-
   renderFaqPublic();
 })();
 </script>
 <script>
 
 
-/* ── PANEL PENGUMUMAN & COUNTDOWN ── */
+/* ── PANEL PENGUMUMAN & COUNTDOWN (Google Sheets via Apps Script) ── */
 (function () {
 
-  // ═══════════════════════════════════════════
-  //  DATA PENGUMUMAN — edit di sini oleh admin
-  // ═══════════════════════════════════════════
-  let ANNOUNCEMENTS = JSON.parse(localStorage.getItem('pbb_announcements') || 'null') || [
-    {
-      id: 1,
-      icon: 'calendar',
-      color: '#C0392B',
-      bg: '#FDEEEC',
-      type: 'Jatuh Tempo',
-      badge: 'urgent',
-      badgeText: '⚠️ Segera',
-      title: 'Jatuh Tempo PBB 2026',
-      detail: 'Batas akhir pembayaran PBB-P2 Tahun 2026',
-      mode: 'countdown',          // 'countdown' atau 'text'
-      deadline: '2026-10-30',     // format YYYY-MM-DD
-      extraText: '',
-    },
-    {
-      id: 2,
-      icon: 'document',
-      color: '#1A6DB5',
-      bg: '#EBF4FF',
-      type: 'Informasi',
-      badge: 'active',
-      badgeText: '✅ Aktif',
-      title: 'SPPT PBB Sudah Bisa Diambil',
-      detail: 'Surat Pemberitahuan Pajak Terutang tahun 2026 sudah tersedia di kantor desa',
-      mode: 'text',
-      deadline: '',
-      extraText: 'Bawa KTP & bukti kepemilikan',
-    },
-    {
-      id: 3,
-      icon: 'gift',
-      color: '#B7791F',
-      bg: '#FEF9EC',
-      type: 'Program',
-      badge: 'warning',
-      badgeText: '🎁 Program',
-      title: 'Penghapusan Sanksi Administratif',
-      detail: 'Program penghapusan denda & sanksi PBB bagi wajib pajak yang melunasi tunggakan',
-      mode: 'text',
-      deadline: '',
-      extraText: 'Berlaku sesuai ketentuan yang berlaku',
-    },
-    {
-      id: 4,
-      icon: 'star',
-      color: '#0B7A45',
-      bg: '#E6F9F0',
-      type: 'Event',
-      badge: 'info',
-      badgeText: '🏆 Event',
-      title: 'Gebyar PBB 2026',
-      detail: 'Perayaan dan penghargaan bagi wajib pajak taat & lunas sebelum jatuh tempo',
-      mode: 'text',
-      deadline: '',
-      extraText: 'Info lebih lanjut segera diumumkan',
-    },
+  let ANNOUNCEMENTS = [
+    { id:'1', icon:'calendar', color:'#C0392B', bg:'#FDEEEC', type:'Jatuh Tempo', badge:'urgent',  badgeText:'⚠️ Segera',   title:'Jatuh Tempo PBB 2026',             detail:'Batas akhir pembayaran PBB-P2 Tahun 2026',                                            mode:'countdown', deadline:'2026-10-30', extraText:'' },
+    { id:'2', icon:'document', color:'#1A6DB5', bg:'#EBF4FF', type:'Informasi',   badge:'active',  badgeText:'✅ Aktif',    title:'SPPT PBB Sudah Bisa Diambil',      detail:'SPPT tahun 2026 sudah tersedia di kantor BKD',                                       mode:'text',      deadline:'',          extraText:'Bawa KTP & bukti kepemilikan' },
+    { id:'3', icon:'gift',     color:'#B7791F', bg:'#FEF9EC', type:'Program',     badge:'warning', badgeText:'🎁 Program', title:'Penghapusan Sanksi Administratif', detail:'Program penghapusan denda & sanksi PBB bagi wajib pajak yang melunasi tunggakan', mode:'text',      deadline:'',          extraText:'Berlaku sesuai ketentuan' },
+    { id:'4', icon:'star',     color:'#0B7A45', bg:'#E6F9F0', type:'Event',       badge:'info',    badgeText:'🏆 Event',   title:'Gebyar PBB 2026',                  detail:'Penghargaan bagi wajib pajak taat & lunas sebelum jatuh tempo',                     mode:'text',      deadline:'',          extraText:'Info segera diumumkan' },
   ];
 
   const ICONS = {
@@ -1874,18 +1786,18 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
   };
 
   const BADGE_CLASS = { urgent:'badge-urgent', active:'badge-active', info:'badge-info', warning:'badge-warning' };
-
   let cdTimers = {};
 
-  function pad(n) { return String(n).padStart(2, '0'); }
+  function pad(n) { return String(n).padStart(2,'0'); }
 
   function renderAnnouncements() {
     const grid = document.getElementById('announceGrid');
+    if (!grid) return;
     grid.innerHTML = '';
     Object.values(cdTimers).forEach(t => clearInterval(t));
     cdTimers = {};
 
-    ANNOUNCEMENTS.forEach((a, idx) => {
+    ANNOUNCEMENTS.forEach(a => {
       const div = document.createElement('div');
       div.className = 'announce-item';
 
@@ -1900,15 +1812,11 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
         </div>`;
       }
 
-      const extraHTML = a.extraText
-        ? `<div style="font-size:0.68rem;color:var(--gray-mid);font-style:italic;margin-top:2px;">${a.extraText}</div>`
-        : '';
-
       div.innerHTML = `
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
           <div class="announce-icon" style="background:${a.bg};">
             <svg viewBox="0 0 22 22" fill="none" style="stroke:${a.color};width:18px;height:18px;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;">
-              ${ICONS[a.icon] ? ICONS[a.icon].match(/<svg[^>]*>([\s\S]*)<\/svg>/)?.[1] || '' : ''}
+              ${ICONS[a.icon] ? ICONS[a.icon].match(/<svg[^>]*>([\s\S]*)<\/svg>/)?.[1]||'' : ''}
             </svg>
           </div>
           <span class="announce-type" style="color:${a.color};">${a.type}</span>
@@ -1916,206 +1824,99 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
         <div class="announce-title">${a.title}</div>
         <div class="announce-detail">${a.detail}</div>
         ${countdownHTML}
-        ${extraHTML}
-        <div class="announce-badge ${BADGE_CLASS[a.badge] || 'badge-info'}">${a.badgeText}</div>
-      `;
+        ${a.extraText ? `<div style="font-size:0.68rem;color:var(--gray-mid);font-style:italic;margin-top:2px;">${a.extraText}</div>` : ''}
+        <div class="announce-badge ${BADGE_CLASS[a.badge]||'badge-info'}">${a.badgeText}</div>`;
       grid.appendChild(div);
 
-      // Start countdown ticker
       if (a.mode === 'countdown' && a.deadline) {
-        const cdId = `cd_${a.id}`;
+        const cdId    = `cd_${a.id}`;
         const deadline = new Date(a.deadline + 'T23:59:59+08:00');
-
         function tickCd() {
           const diff = deadline - new Date();
           if (diff <= 0) {
             const wrap = document.getElementById(cdId);
             if (wrap) wrap.innerHTML = '<div style="font-size:0.72rem;color:var(--red);font-weight:700;">⚠️ Sudah melewati jatuh tempo!</div>';
-            clearInterval(cdTimers[cdId]);
-            return;
+            clearInterval(cdTimers[cdId]); return;
           }
-          const dEl = document.getElementById(cdId + '_d');
-          const hEl = document.getElementById(cdId + '_h');
-          const mEl = document.getElementById(cdId + '_m');
-          const sEl = document.getElementById(cdId + '_s');
+          const dEl=document.getElementById(cdId+'_d'), hEl=document.getElementById(cdId+'_h'),
+                mEl=document.getElementById(cdId+'_m'), sEl=document.getElementById(cdId+'_s');
           if (!dEl) return;
-          dEl.textContent = pad(Math.floor(diff / 86400000));
-          hEl.textContent = pad(Math.floor((diff % 86400000) / 3600000));
-          mEl.textContent = pad(Math.floor((diff % 3600000) / 60000));
-          sEl.textContent = pad(Math.floor((diff % 60000) / 1000));
+          dEl.textContent=pad(Math.floor(diff/86400000));
+          hEl.textContent=pad(Math.floor((diff%86400000)/3600000));
+          mEl.textContent=pad(Math.floor((diff%3600000)/60000));
+          sEl.textContent=pad(Math.floor((diff%60000)/1000));
         }
-        tickCd();
-        cdTimers[cdId] = setInterval(tickCd, 1000);
+        tickCd(); cdTimers[cdId] = setInterval(tickCd, 1000);
       }
     });
   }
-
-  // ── ADMIN AUTH ──
-  const ADMIN_HASH = 'fd2bb052f4d3faceaa9ef25b04e411bae56b5565acf7934531096ad96f5ec5f8';
-
-  let _adminUnlocked = false;
-  let _failCount = 0;
-  let _lockUntil  = 0;
-  let _adminTarget = 'announce'; // 'announce' | 'slideshow' | 'faq'
-
-  async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
-  }
-
-  window.promptAdminLogin = function (target) {
-    _adminTarget = target || 'announce';
-    if (_adminUnlocked) { openAdminTarget(); return; }
-    const now = Date.now();
-    if (_failCount >= 5 && now < _lockUntil) {
-      const sisa = Math.ceil((_lockUntil - now) / 1000);
-      document.getElementById('adminAttemptInfo').textContent = `Terlalu banyak percobaan. Tunggu ${sisa} detik.`;
-      document.getElementById('adminModalOverlay').classList.add('show');
-      document.getElementById('adminPasswordInput').disabled = true;
-      document.querySelector('.btn-login').disabled = true;
-      return;
-    }
-    document.getElementById('adminPasswordInput').value = '';
-    document.getElementById('adminPasswordInput').disabled = false;
-    document.querySelector('.btn-login').disabled = false;
-    document.getElementById('adminLoginError').classList.remove('show');
-    document.getElementById('adminAttemptInfo').textContent = '';
-    document.getElementById('adminModalOverlay').classList.add('show');
-    setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
-  };
-
-  function openAdminTarget() {
-    if (_adminTarget === 'slideshow') { openSlideshowAdmin(); }
-    else if (_adminTarget === 'faq')  { openFaqAdmin(); }
-    else                               { toggleAdminPanel(); }
-  }
-
-  window.closeAdminModal = function () {
-    document.getElementById('adminModalOverlay').classList.remove('show');
-  };
-
-  window.submitAdminLogin = async function () {
-    const now = Date.now();
-    if (_failCount >= 5 && now < _lockUntil) return;
-
-    const input = document.getElementById('adminPasswordInput').value;
-    const hash  = await sha256(input);
-
-    if (hash === ADMIN_HASH) {
-      _adminUnlocked = true;
-      _failCount = 0;
-      closeAdminModal();
-      openAdminTarget();
-    } else {
-      _failCount++;
-      const errEl  = document.getElementById('adminLoginError');
-      const infoEl = document.getElementById('adminAttemptInfo');
-      errEl.classList.add('show');
-      const sisa = 5 - _failCount;
-      if (_failCount >= 5) {
-        _lockUntil = Date.now() + 60000;
-        document.getElementById('adminPasswordInput').disabled = true;
-        document.querySelector('.btn-login').disabled = true;
-        infoEl.textContent = 'Akses dikunci selama 60 detik.';
-        setTimeout(() => {
-          document.getElementById('adminPasswordInput').disabled = false;
-          document.querySelector('.btn-login').disabled = false;
-          infoEl.textContent = '';
-          _failCount = 0;
-        }, 60000);
-      } else {
-        infoEl.textContent = `Kesempatan tersisa: ${sisa}`;
-      }
-      document.getElementById('adminPasswordInput').value = '';
-      document.getElementById('adminPasswordInput').focus();
-    }
-  };
-
-  document.getElementById('adminModalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeAdminModal();
-  });
 
   // ── ADMIN PANEL ──
   window.toggleAdminPanel = function () {
     const panel = document.getElementById('adminPanel');
     const isHidden = panel.style.display === 'none';
-    if (isHidden) {
-      buildAdminFields();
-      panel.style.display = 'block';
-    } else {
-      panel.style.display = 'none';
-      _adminUnlocked = false; // logout otomatis setelah tutup
-    }
+    if (isHidden) { buildAdminFields(); panel.style.display = 'block'; }
+    else { panel.style.display = 'none'; _adminUnlocked = false; }
   };
 
   function buildAdminFields() {
     const container = document.getElementById('adminFields');
     container.innerHTML = '';
-
     ANNOUNCEMENTS.forEach((a, idx) => {
       const section = document.createElement('div');
-      section.innerHTML = `<div class="admin-section-title">📌 Kartu ${idx + 1}</div>`;
-
-      const fields = [
-        { label: 'Judul', key: 'title', type: 'text' },
-        { label: 'Keterangan / Detail', key: 'detail', type: 'text' },
-        { label: 'Tipe Label (atas)', key: 'type', type: 'text' },
-        { label: 'Teks Badge', key: 'badgeText', type: 'text' },
-        {
-          label: 'Warna Badge',
-          key: 'badge',
-          type: 'select',
-          options: [
-            { v: 'urgent', l: '🔴 Merah (Urgent)' },
-            { v: 'active', l: '🟢 Hijau (Aktif)' },
-            { v: 'info',   l: '🔵 Biru (Info)' },
-            { v: 'warning',l: '🟡 Kuning (Peringatan)' },
-          ]
-        },
-        {
-          label: 'Mode Tampilan',
-          key: 'mode',
-          type: 'select',
-          options: [
-            { v: 'text',      l: '📝 Teks biasa' },
-            { v: 'countdown', l: '⏱️ Countdown timer' },
-          ]
-        },
-        { label: 'Tanggal Deadline (YYYY-MM-DD, jika countdown)', key: 'deadline', type: 'date' },
-        { label: 'Catatan Kecil (opsional)', key: 'extraText', type: 'text' },
-      ];
-
-      fields.forEach(f => {
+      section.innerHTML = `<div class="admin-section-title">📌 Kartu ${idx+1}</div>`;
+      [
+        { label:'Judul',                         key:'title',     type:'text'   },
+        { label:'Keterangan / Detail',            key:'detail',    type:'text'   },
+        { label:'Tipe Label (atas)',              key:'type',      type:'text'   },
+        { label:'Teks Badge',                    key:'badgeText', type:'text'   },
+        { label:'Warna Badge', key:'badge', type:'select', options:[{v:'urgent',l:'🔴 Merah'},{v:'active',l:'🟢 Hijau'},{v:'info',l:'🔵 Biru'},{v:'warning',l:'🟡 Kuning'}] },
+        { label:'Mode Tampilan', key:'mode', type:'select', options:[{v:'text',l:'📝 Teks biasa'},{v:'countdown',l:'⏱️ Countdown timer'}] },
+        { label:'Tanggal Deadline (YYYY-MM-DD)', key:'deadline',  type:'date'   },
+        { label:'Catatan Kecil (opsional)',       key:'extraText', type:'text'   },
+      ].forEach(f => {
         const row = document.createElement('div');
         row.className = 'admin-field-row';
-        let inputHTML = '';
-        if (f.type === 'select') {
-          const opts = f.options.map(o =>
-            `<option value="${o.v}" ${a[f.key] === o.v ? 'selected' : ''}>${o.l}</option>`
-          ).join('');
-          inputHTML = `<select data-idx="${idx}" data-key="${f.key}">${opts}</select>`;
-        } else {
-          inputHTML = `<input type="${f.type}" data-idx="${idx}" data-key="${f.key}" value="${a[f.key] || ''}">`;
-        }
+        let inputHTML = f.type === 'select'
+          ? `<select data-idx="${idx}" data-key="${f.key}">${f.options.map(o=>`<option value="${o.v}"${a[f.key]===o.v?' selected':''}>${o.l}</option>`).join('')}</select>`
+          : `<input type="${f.type}" data-idx="${idx}" data-key="${f.key}" value="${(a[f.key]||'').replace(/"/g,'&quot;')}">`;
         row.innerHTML = `<label>${f.label}</label>${inputHTML}`;
         section.appendChild(row);
       });
-
       container.appendChild(section);
     });
   }
 
+  // ── SIMPAN KE GOOGLE SHEETS ──
   window.saveAnnouncements = function () {
     document.querySelectorAll('#adminFields [data-idx]').forEach(el => {
-      const idx = parseInt(el.dataset.idx);
-      const key = el.dataset.key;
-      ANNOUNCEMENTS[idx][key] = el.value;
+      ANNOUNCEMENTS[+el.dataset.idx][el.dataset.key] = el.value;
     });
-    try { localStorage.setItem('pbb_announcements', JSON.stringify(ANNOUNCEMENTS)); } catch(e) {}
-    document.getElementById('adminPanel').style.display = 'none';
-    renderAnnouncements();
+
+    const btn = document.querySelector('#adminPanel button[onclick="saveAnnouncements()"]');
+    const origText = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
+
+    const url = _GAS_URL + '?action=save_pengumuman&data=' + encodeURIComponent(JSON.stringify(ANNOUNCEMENTS));
+    fetch(url)
+      .then(r => r.json())
+      .then(d => {
+        if (btn) { btn.textContent = d.ok ? '✅ Tersimpan!' : '❌ Gagal'; btn.disabled = false; }
+        setTimeout(() => { if (btn) btn.textContent = origText; }, 2000);
+        if (d.ok) {
+          document.getElementById('adminPanel').style.display = 'none';
+          _adminUnlocked = false;
+          renderAnnouncements();
+        }
+      })
+      .catch(() => {
+        if (btn) { btn.textContent = '❌ Gagal'; btn.disabled = false; }
+        setTimeout(() => { if (btn) btn.textContent = origText; }, 2000);
+      });
   };
+
+  // Terima data dari fetch terpadu (dipanggil oleh IIFE di bawah)
+  window._announceSetData = function(data) { ANNOUNCEMENTS = data; renderAnnouncements(); };
 
   renderAnnouncements();
 })();
@@ -2147,7 +1948,7 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
     '2025-05-01': 'Hari Buruh Internasional',
     '2025-05-12': 'Hari Raya Waisak',
     '2025-05-13': 'Cuti Bersama Waisak',
-    '2025-05-29': 'Kenaikan Isa Al-Masih',
+    '2025-05-29': 'Kenaikan Yesus Kristus',
     '2025-05-30': 'Cuti Bersama Kenaikan Isa Al-Masih',
     '2025-06-01': 'Hari Lahir Pancasila',
     '2025-06-06': 'Idul Adha',
@@ -2171,28 +1972,29 @@ document.getElementById('adminPasswordInput').addEventListener('keydown', functi
     '2026-03-27': 'Cuti Bersama Idul Fitri',
     '2026-04-03': 'Wafat Isa Al-Masih',
     '2026-05-01': 'Hari Buruh Internasional',
-    '2026-05-14': 'Kenaikan Isa Al-Masih',
-    '2026-05-15': 'Cuti Bersama',
+    '2026-05-14': 'Kenaikan Yesus Kristus',
+    '2026-05-15': 'Cuti Bersama Kenaikan Yesus Kristus',
     '2026-05-27': 'Idul Adha',
-    '2026-05-28': 'Cuti Bersama',
+    '2026-05-27': 'Cuti Bersama Idul Adha',
     '2026-06-01': 'Hari Lahir Pancasila',
-    '2026-06-10': 'Hari Raya Waisak',
     '2026-06-16': 'Hari Penampahan Galungan',
-    '2026-06-17': 'Hari Raya Galungan',
-    '2026-06-18': 'Hari Manis Galungan',
+    '2026-06-17': 'Hari Raya Galungan & Tahun Baru Islam 1448 H',
+    '2026-06-18': 'Hari Raya Galungan',
     '2026-08-17': 'HUT Kemerdekaan RI',
     '2026-08-25': 'Maulid Nabi Muhammad SAW',
+    '2026-11-04': 'Hari Raya Pagerwesi',
     '2026-12-25': 'Hari Raya Natal',
+    '2026-12-26': 'Cuti Bersama Hari Raya Natal',
   };
   // ═══════════════════════════════════════════════════════════
 
   // Jam operasional reguler (WITA = UTC+8)
   const schedule = {
-    1: { open: 7.5, close: 15.5 },  // Senin
-    2: { open: 7.5, close: 15.5 },  // Selasa
-    3: { open: 7.5, close: 15.5 },  // Rabu
-    4: { open: 7.5, close: 15.5 },  // Kamis
-    5: { open: 7.5, close: 14.0 },  // Jumat
+    1: { open: 8, close: 15.0 },  // Senin
+    2: { open: 8, close: 15.0 },  // Selasa
+    3: { open: 8, close: 15.0 },  // Rabu
+    4: { open: 8, close: 15.0 },  // Kamis
+    5: { open: 8, close: 12.0 },  // Jumat
     0: null,                          // Minggu
     6: null,                          // Sabtu
   };
@@ -2297,12 +2099,9 @@ function toggleFaq(btn) {
 /* ── SLIDESHOW – sumber dari Google Drive via Apps Script ── */
 (function () {
 
-  // ┌─────────────────────────────────────────────────────────────┐
-  // │  GANTI URL INI dengan URL deployment Apps Script Anda       │
-  // │  Contoh:                                                    │
-  // │  https://script.google.com/macros/s/AKfy.../exec            │
-  // └─────────────────────────────────────────────────────────────┘
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwB18Ui8QpiylwgCDYj0B0y-FZ6d0bVuEMAC3gmSeU_JaspGq6Ze2Q6Ta5tZWZvqLfuAQ/exec';
+  // URL diambil dari variabel global _GAS_URL (sudah di-set di bawah)
+  // Pastikan _GAS_URL sudah diisi sebelum script ini jalan
+  // (Catatan: script ini dijalankan setelah DOM ready, jadi _GAS_URL sudah tersedia)
 
   const viewport    = document.getElementById('viewport');
   const dotsWrap    = document.getElementById('dots');
@@ -2410,11 +2209,11 @@ function toggleFaq(btn) {
   /* ── Fetch foto dari Apps Script ── */
   function fetchFromDrive() {
     showLoading();
-    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('GANTI')) {
-      showError('URL Apps Script belum diisi.<br>Buka file HTML dan isi APPS_SCRIPT_URL.');
+    if (!window._GAS_URL || window._GAS_URL.includes('GANTI')) {
+      showError('URL Apps Script belum diisi.<br>Buka file HTML dan isi _GAS_URL.');
       return;
     }
-    fetch(APPS_SCRIPT_URL)
+    fetch(window._GAS_URL)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -2484,43 +2283,12 @@ function toggleFaq(btn) {
 
 })();
 
-/* ── ADMIN FAQ ── */
+/* ── ADMIN FAQ (Google Sheets via Apps Script) ── */
 (function () {
-  const STORE_KEY = 'pbb_faq_items';
-
-  const DEFAULT_FAQ = [
-    { q: 'Bagaimana cara membayar PBB-P2?', a: 'Pembayaran PBB-P2 dapat dilakukan melalui: <strong>Bank BPD Bali</strong>, kantor pos, minimarket (Indomaret/Alfamart), atau melalui aplikasi mobile banking. Siapkan <strong>NOP (Nomor Objek Pajak)</strong> yang tertera di SPPT Anda. Pembayaran juga bisa dilakukan langsung di Kantor Bapenda Kabupaten Tabanan.' },
-    { q: 'Apa itu NOP dan di mana saya menemukannya?', a: '<strong>NOP (Nomor Objek Pajak)</strong> adalah nomor unik 18 digit yang mengidentifikasi setiap objek pajak bumi dan bangunan. NOP dapat ditemukan di <strong>SPPT</strong> yang diterbitkan setiap tahun, atau dengan menghubungi kantor Bapenda Kabupaten Tabanan.' },
-    { q: 'Berapa sanksi keterlambatan pembayaran PBB?', a: 'Sesuai peraturan daerah, keterlambatan pembayaran PBB-P2 dikenakan <strong>denda sebesar 2% per bulan</strong> dari pokok pajak yang terutang, dihitung sejak tanggal jatuh tempo (31 Agustus).' },
-    { q: 'Apa saja syarat mengajukan permohonan SK NJOP?', a: 'Persyaratan: <strong>(1)</strong> Fotokopi KTP, <strong>(2)</strong> Fotokopi sertifikat tanah, <strong>(3)</strong> Fotokopi SPPT PBB tahun terakhir, <strong>(4)</strong> Surat kuasa bermaterai (jika dikuasakan), <strong>(5)</strong> Formulir permohonan.' },
-    { q: 'Bagaimana cara mengajukan keberatan atas nilai NJOP?', a: 'Keberatan diajukan secara tertulis ke Kantor Bapenda paling lambat <strong>3 bulan</strong> sejak diterimanya SPPT, dengan lampiran dokumen pendukung.' },
-    { q: 'Apa penyebab objek PBB diblokir dan bagaimana membuka blokirnya?', a: 'Objek PBB diblokir karena sengketa kepemilikan atau proses jual-beli yang belum selesai. Ajukan permohonan melalui menu <em>Buka Blokir PBB</em>. Proses memakan waktu <strong>5–14 hari kerja</strong>.' },
-  ];
-
-  let FAQ_DATA;
-  try { FAQ_DATA = JSON.parse(localStorage.getItem(STORE_KEY)) || DEFAULT_FAQ; }
-  catch(e) { FAQ_DATA = DEFAULT_FAQ; }
-
-  function renderFaqPublic() {
-    const list = document.getElementById('faqList');
-    list.innerHTML = '';
-    FAQ_DATA.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'faq-item';
-      div.innerHTML = `
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span class="faq-q-text">${item.q}</span>
-          <div class="faq-icon"><svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10"/></svg></div>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">${item.a}</div>
-        </div>`;
-      list.appendChild(div);
-    });
-  }
-
   function buildFaqAdminList() {
+    const FAQ_DATA = window._faqGetData ? window._faqGetData() : [];
     const container = document.getElementById('faqAdminList');
+    if (!container) return;
     container.innerHTML = '';
     FAQ_DATA.forEach((item, i) => {
       const row = document.createElement('div');
@@ -2532,47 +2300,73 @@ function toggleFaq(btn) {
         </div>
         <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:3px;">Pertanyaan</div>
         <input type="text" data-faq-idx="${i}" data-faq-key="q" value="${item.q.replace(/"/g,'&quot;')}"
-          style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.12);border-radius:7px;font-size:0.8rem;font-family:inherit;margin-bottom:0.4rem;outline:none;">
+          style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.12);border-radius:7px;font-size:0.8rem;font-family:inherit;margin-bottom:0.4rem;outline:none;box-sizing:border-box;">
         <div style="font-size:0.7rem;font-weight:700;color:#555;margin-bottom:3px;">Jawaban</div>
         <textarea data-faq-idx="${i}" data-faq-key="a"
-          style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.12);border-radius:7px;font-size:0.8rem;font-family:inherit;resize:vertical;min-height:60px;outline:none;">${item.a}</textarea>`;
+          style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.12);border-radius:7px;font-size:0.8rem;font-family:inherit;resize:vertical;min-height:60px;outline:none;box-sizing:border-box;">${item.a}</textarea>`;
       container.appendChild(row);
     });
   }
 
-  window.openFaqAdmin = function () {
-    buildFaqAdminList();
-    document.getElementById('faqAdminPanel').style.display = 'block';
-  };
-
-  window.closeFaqAdmin = function () {
-    document.getElementById('faqAdminPanel').style.display = 'none';
-    _adminUnlocked = false;
-  };
+  window.openFaqAdmin = function () { buildFaqAdminList(); document.getElementById('faqAdminPanel').style.display = 'block'; };
+  window.closeFaqAdmin = function () { document.getElementById('faqAdminPanel').style.display = 'none'; _adminUnlocked = false; };
 
   window.addFaqItem = function () {
-    FAQ_DATA.push({ q: 'Pertanyaan baru', a: 'Jawaban di sini.' });
+    const FAQ_DATA = window._faqGetData ? window._faqGetData() : [];
+    FAQ_DATA.push({ q:'Pertanyaan baru', a:'Jawaban di sini.' });
+    if (window._faqSetData) window._faqSetData(FAQ_DATA);
     buildFaqAdminList();
   };
 
   window.deleteFaqItem = function (idx) {
     if (!confirm('Hapus FAQ ini?')) return;
+    const FAQ_DATA = window._faqGetData ? window._faqGetData() : [];
     FAQ_DATA.splice(idx, 1);
+    if (window._faqSetData) window._faqSetData(FAQ_DATA);
     buildFaqAdminList();
   };
 
   window.saveFaq = function () {
+    const FAQ_DATA = window._faqGetData ? window._faqGetData() : [];
     document.querySelectorAll('#faqAdminList [data-faq-idx]').forEach(el => {
-      const i = parseInt(el.dataset.faqIdx);
-      const k = el.dataset.faqKey;
-      FAQ_DATA[i][k] = el.value;
+      FAQ_DATA[+el.dataset.faqIdx][el.dataset.faqKey] = el.value;
     });
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(FAQ_DATA)); } catch(e) {}
-    renderFaqPublic();
-    closeFaqAdmin();
-  };
+    if (window._faqSetData) window._faqSetData(FAQ_DATA);
 
-  renderFaqPublic();
+    const btn = document.querySelector('#faqAdminPanel button[onclick="saveFaq()"]');
+    const origText = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
+
+    const url = _GAS_URL + '?action=save_faq&data=' + encodeURIComponent(JSON.stringify(FAQ_DATA));
+    fetch(url)
+      .then(r => r.json())
+      .then(d => {
+        if (btn) { btn.textContent = d.ok ? '✅ Tersimpan!' : '❌ Gagal'; btn.disabled = false; }
+        setTimeout(() => { if (btn) btn.textContent = origText; }, 2000);
+        if (d.ok) closeFaqAdmin();
+      })
+      .catch(() => {
+        if (btn) { btn.textContent = '❌ Gagal'; btn.disabled = false; }
+        setTimeout(() => { if (btn) btn.textContent = origText; }, 2000);
+      });
+  };
+})();
+
+/* ── FETCH TERPADU DARI GOOGLE APPS SCRIPT ── */
+
+(function () {
+  if (!_GAS_URL || _GAS_URL.includes('GANTI')) return;
+
+  fetch(_GAS_URL)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(data => {
+      if (!data.ok) return;
+      if (data.pengumuman && data.pengumuman.length && window._announceSetData)
+        window._announceSetData(data.pengumuman);
+      if (data.faq && data.faq.length && window._faqSetData)
+        window._faqSetData(data.faq);
+    })
+    .catch(err => console.warn('Portal PBB: gagal fetch dari Apps Script —', err.message));
 })();
 
 /* ── LIGHTBOX ── */
